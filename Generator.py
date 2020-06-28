@@ -18,7 +18,8 @@ if __name__ == '__main__':
     myDpi = 400
     mpl.rcParams['figure.dpi'] = myDpi
 
-    fig = plt.figure(figsize=(6, 6), dpi=myDpi, facecolor='w')
+    # 5.5 = 2000 pixel at dpi = 200. May scale up as demanded
+    fig = plt.figure(figsize=(5.5, 5.5), dpi=myDpi, facecolor='w')
     ax = fig.add_axes([0, 0, 1, 1])
     plt.autoscale(False, tight=True)
     plt.xlim(0, k1)
@@ -40,7 +41,7 @@ if __name__ == '__main__':
 
     region = ax.transData.transform([(0, 0), (k1, k1)])
     BBOX = trs.Bbox(region / myDpi)
-    fig.savefig("GC-testing1", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
+    fig.savefig("GT-testing1", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
                 pad_inches=0)
 
     Obstacle1 = feature_gen(k1, 15, 15)
