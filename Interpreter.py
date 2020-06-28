@@ -3,6 +3,12 @@ import numpy as np
 from joblib import Parallel, delayed
 
 
+def check_parallel(ImgSize, numJobs, boxSize0):
+    if ImgSize % (numJobs * boxSize0) == 0:
+        return True
+    return False
+
+
 def calculate_info(index, GT_Img0, n_worker0, boxSize0):
     base = index * int(GT_Img0.shape[0] / n_worker0)
     end = (index + 1) * int(GT_Img0.shape[0] / n_worker0)
@@ -55,9 +61,14 @@ if __name__ == '__main__':
     GT_Img = GroundTruth.img
 
     n_worker = 4
+    results = None
+    if check_parallel(GT_Img.shape[0], n_worker, boxSize):
+        results = Parallel(n_jobs=n_worker)(
+            delayed(calculate_info)(ind, GT_Img, n_worker, boxSize) for ind in range(n_worker))
+    else:  # not tested
+        results = Parallel(n_jobs=1)(
+            delayed(calculate_info)(ind, GT_Img, n_worker, boxSize) for ind in range(n_worker))
 
-    results = Parallel(n_jobs=n_worker)(
-        delayed(calculate_info)(ind, GT_Img, n_worker, boxSize) for ind in range(n_worker))
     GT_InfoMap = results[0]
     for n in range(1, n_worker):
         GT_InfoMap = np.concatenate((GT_InfoMap, results[n]), axis=0)
