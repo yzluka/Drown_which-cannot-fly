@@ -73,6 +73,4 @@ if __name__ == '__main__':
     for n in range(1, n_worker):
         GT_InfoMap = np.concatenate((GT_InfoMap, results[n]), axis=0)
 
-    with open('filename.txt', 'w+') as f:
-        for line in GT_InfoMap:
-            print(line, file=f)
+    np.save('InfoMap', np.asarray(GT_InfoMap), allow_pickle=False)
