@@ -1,6 +1,8 @@
 import Simulator as Sim
 import numpy as np
 from joblib import Parallel, delayed
+import blurring as sp
+from scipy.ndimage import gaussian_filter
 
 
 def check_parallel(ImgSize, numJobs, boxSize0):
@@ -37,12 +39,7 @@ if __name__ == '__main__':
     if not GroundTruth.loadImage():
         print("Error: could not load image")
         exit(0)
-    '''
-    DataImage = Sim.ICRSsimulator('testing1.png')
-    if not DataImage.loadImage():
-        print("Error: could not load image")
-        exit(0)
-    '''
+
     lower = np.array([255, 255, 255])
     upper = np.array([255, 255, 255])
 
@@ -58,7 +55,7 @@ if __name__ == '__main__':
 
     GroundTruth.createMap()
     GroundTruth.showMap()
-    GT_Img = GroundTruth.img
+    GT_Img = sp.salt_noisy(GroundTruth.img)
 
     n_worker = 4
     results = None
@@ -72,5 +69,6 @@ if __name__ == '__main__':
     GT_InfoMap = results[0]
     for n in range(1, n_worker):
         GT_InfoMap = np.concatenate((GT_InfoMap, results[n]), axis=0)
-
+    InfoMap2 = gaussian_filter(GT_InfoMap, sigma=1)
     np.save('InfoMap', np.asarray(GT_InfoMap), allow_pickle=False)
+    np.save('InfoMap_blurred', np.asarray(InfoMap2), allow_pickle=False)

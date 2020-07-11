@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
-def from_file(filename='InfoMap.npy'):
+def from_file(filename='InfoMap_blurred.npy'):
     return np.load(filename)
 
 
