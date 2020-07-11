@@ -2,6 +2,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import transforms as trs
+from matplotlib.patches import Ellipse
 import matplotlib as mpl
 
 
@@ -27,13 +28,20 @@ if __name__ == '__main__':
 
 
     def load_feature(feature, shape='circle', color='r', alpha=0.5):
-        if shape == 'circle':
-            for dot in feature:
+
+        for dot in feature:
+            if shape == 'circle':
                 ax.add_artist(plt.Circle((dot[0], dot[1]), dot[2], ec='none', color=color, alpha=alpha))
+            elif shape == 'ellipse' or 'oval':
+                width = 8
+                height = 6
+                for steps in range(0, 100):
+                    ax.add_patch(Ellipse((dot[0], dot[1]), width=dot[2], height=dot[2] * 0.6,
+                                         edgecolor='none', facecolor=color))
 
 
     RawMap = feature_gen(k1, n1, max_r1)
-    load_feature(RawMap)
+    load_feature(RawMap, shape='oval')
 
     # verifying graph is correctly extracted
     ax.axis('square', adjustabble='box-force')
