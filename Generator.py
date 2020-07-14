@@ -6,6 +6,18 @@ from matplotlib.patches import Ellipse
 import matplotlib as mpl
 
 
+def enhance():
+    return ['#ff007f', 0.2]
+
+
+def real():
+    return ['r', 0.5]
+
+
+def reduce():
+    return ['b', 0.2]
+
+
 def feature_gen(k=200, n=20, r=15):
     loc = []
     for _ in range(n):
@@ -28,11 +40,14 @@ if __name__ == '__main__':
     plt.ylim(0, k1)
 
 
-    def load_feature(feature, shape='circle', color='r', alpha=0.5):
+    def load_feature(feature, shape='circle', target=None):
+
+        if target is None:
+            target = real()
 
         for dot in feature:
             if shape == 'circle':
-                ax.add_artist(plt.Circle((dot[0], dot[1]), dot[2], ec='none', color=color, alpha=alpha))
+                ax.add_artist(plt.Circle((dot[0], dot[1]), dot[2], ec='none', color=target[0], alpha=target[1]))
             elif shape == 'ellipse' or 'oval':
 
                 # Edit parameters here:
@@ -44,7 +59,7 @@ if __name__ == '__main__':
                     ax.add_artist(
                         Ellipse((dot[0], dot[1]), width=dot[2] * coefficient,
                                 height=dot[2] * width_height_ratio * coefficient, angle=dot[3],
-                                edgecolor=None, facecolor=color, alpha=alpha * 2 / num_steps))
+                                edgecolor=None, facecolor=target[0], alpha=target[1] * 2 / num_steps))
 
 
     RawMap = feature_gen(k1, n1, max_r1)
@@ -62,8 +77,8 @@ if __name__ == '__main__':
     Obstacle1 = feature_gen(k1, 15, 15)
     fakeTarget = feature_gen(k1, 10, max_r1)
 
-    load_feature(Obstacle1, color='b', alpha=0.3)
-    load_feature(fakeTarget, color='#FF007F', alpha=0.5)
+    load_feature(Obstacle1, target=reduce())
+    load_feature(fakeTarget, target=enhance())
     ax.plot()
     plt.show()
     fig.savefig("testing1", dpi=myDpi, facecolor='w', bbox_inches=BBOX,

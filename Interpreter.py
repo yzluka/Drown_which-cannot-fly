@@ -34,12 +34,12 @@ if __name__ == '__main__':
     rows = 100
     cols = 100
     boxSize = 20
-    GroundTruth = Sim.ICRSsimulator('GT-testing1_blurred.png')
+    GroundTruth = Sim.ICRSsimulator('testing1_blurred.png')
 
     if not GroundTruth.loadImage():
         print("Error: could not load image")
         exit(0)
-
+    '''
     lower = np.array([255, 255, 255])
     upper = np.array([255, 255, 255])
 
@@ -50,12 +50,12 @@ if __name__ == '__main__':
     upper = np.array([200, 200, 255])
     interestValue = 0  # Mark these areas as being of no interest
     GroundTruth.classify('target', lower, upper, interestValue)
-
+    '''
     GroundTruth.setMapSize(rows, cols)
 
     GroundTruth.createMap()
-    GroundTruth.showMap()
-    GT_Img = sp.salt_noisy(GroundTruth.img)
+    # GroundTruth.showMap()
+    GT_Img = GroundTruth.img
 
     n_worker = 4
     results = None
