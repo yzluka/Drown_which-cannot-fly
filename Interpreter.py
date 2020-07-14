@@ -34,7 +34,7 @@ if __name__ == '__main__':
     rows = 100
     cols = 100
     boxSize = 20
-    GroundTruth = Sim.ICRSsimulator('GT-testing1.png')
+    GroundTruth = Sim.ICRSsimulator('GT-testing1_blurred.png')
 
     if not GroundTruth.loadImage():
         print("Error: could not load image")

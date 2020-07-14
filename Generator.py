@@ -6,16 +6,17 @@ from matplotlib.patches import Ellipse
 import matplotlib as mpl
 
 
-def feature_gen(k=200, n=20, r=10):
+def feature_gen(k=200, n=20, r=15):
     loc = []
     for _ in range(n):
         loc.append([np.random.randint(0, k), np.random.randint(0, k),
-                    np.random.randint(1, r)])
+                    np.random.randint(1, r), np.random.randint(0, 180)])
     return loc
 
 
 if __name__ == '__main__':
-    k1, n1, max_r1 = 200, 20, 20
+    # Edit graphic parameters here
+    k1, n1, max_r1 = 200, 10, 20
     myDpi = 400
     mpl.rcParams['figure.dpi'] = myDpi
 
@@ -33,11 +34,17 @@ if __name__ == '__main__':
             if shape == 'circle':
                 ax.add_artist(plt.Circle((dot[0], dot[1]), dot[2], ec='none', color=color, alpha=alpha))
             elif shape == 'ellipse' or 'oval':
-                width = 8
-                height = 6
-                for steps in range(0, 100):
-                    ax.add_patch(Ellipse((dot[0], dot[1]), width=dot[2], height=dot[2] * 0.6,
-                                         edgecolor='none', facecolor=color))
+
+                # Edit parameters here:
+                width_height_ratio = 3 / 4
+                num_steps = dot[2] * 2
+
+                for steps in range(1, num_steps + 1):
+                    coefficient = steps / num_steps * 2
+                    ax.add_artist(
+                        Ellipse((dot[0], dot[1]), width=dot[2] * coefficient,
+                                height=dot[2] * width_height_ratio * coefficient, angle=dot[3],
+                                edgecolor=None, facecolor=color, alpha=alpha * 2 / num_steps))
 
 
     RawMap = feature_gen(k1, n1, max_r1)

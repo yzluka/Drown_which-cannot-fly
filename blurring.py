@@ -24,5 +24,4 @@ def salt_noisy(image, density=0.04, portion=0.5):
 if __name__ == '__main__':
     img0 = cv2.imread('GT-testing1.png')
     img1 = salt_noisy(img0)
-    cv2.imshow('img1', img1)
-    cv2.waitKey(0)
+    cv2.imwrite('GT-testing1_blurred.png', img1)
