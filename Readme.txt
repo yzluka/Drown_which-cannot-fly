@@ -70,4 +70,4 @@ File explanation (By execution sequence):
     4. Reconstruct.py: Visualization of the information map. Can be used to compare with the result given by GT-testing_bw.png. We can visually find that we have some ROI being
         hidden and some False positive (FP) start to appear on the product map. This fits exactly with the nature of a typical output from a Neural Network.
      
-            
+    5. Normalizer.py: Turn the information map from raw data into NN-like output(0-1 range)
