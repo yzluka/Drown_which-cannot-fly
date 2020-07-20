@@ -1,3 +1,4 @@
+# Visualization of the belief information map.
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 import numpy as np
@@ -11,7 +12,8 @@ if __name__ == '__main__':
     Map = from_file()
     edgeSize = len(Map)
 
-    k = 200  # k is the number of
+    boxSize = 10  # same as the one in Interpreter.py
+    k = 200  # k is the coordinate resolution(the number of region on each side)
     unitLength = k / edgeSize
     myDpi = 400
     mpl.rcParams['figure.dpi'] = myDpi
@@ -29,7 +31,8 @@ if __name__ == '__main__':
         counterY -= 1
         counterX = 0
         for j in i:
-            ax.add_artist(plt.Rectangle((counterX, counterY * unitLength), unitLength, unitLength, alpha=j / 400))
+            ax.add_artist(
+                plt.Rectangle((counterX, counterY * unitLength), unitLength, unitLength, alpha=j / boxSize ** 2))
             counterX += unitLength
     ax.plot()
     plt.show()

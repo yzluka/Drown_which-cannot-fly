@@ -1,4 +1,9 @@
 # Assumption: Image is square
+# For the generator, we are going to use different colors to represent different
+# ROI in a object recognition neural network. There should be three types of ROI:
+# Real object(true positive), obstacle/reduce(False Negative),
+# fake object / enhance(False Positive) and Background(True Negative)
+
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import transforms as trs
@@ -6,18 +11,22 @@ from matplotlib.patches import Ellipse
 import matplotlib as mpl
 
 
+# Fake object [color, alpha]
 def enhance():
     return ['#ff007f', 0.2]
 
 
+# Real object [color, alpha]
 def real():
     return ['r', 0.5]
 
 
+# obstacle [color, alpha]
 def reduce():
     return ['b', 0.2]
 
 
+# generate the position, size and angle of rotation for each feature
 def feature_gen(k=200, n=20, r=15):
     loc = []
     for _ in range(n):
@@ -28,57 +37,80 @@ def feature_gen(k=200, n=20, r=15):
 
 if __name__ == '__main__':
     # Edit graphic parameters here
-    k1, n1, max_r1 = 200, 10, 20
-    myDpi = 400
-    mpl.rcParams['figure.dpi'] = myDpi
+    # k1: number of sub-region on length
+    k1 = 200
+
+    # [number of feature, maximum size of the feature]
+    real_pram = [10, 20]
+    obstacle_pram = [15, 15]
+    fake_pram = [10, 20]
 
     # 5.5 = 2000 pixel at dpi = 200. May scale up as demanded
-    fig = plt.figure(figsize=(5.5, 5.5), dpi=myDpi, facecolor='w')
+    myDpi = 400
+    pic_edge_len = 5.5
+    mpl.rcParams['figure.dpi'] = myDpi
+    fig = plt.figure(figsize=(pic_edge_len, pic_edge_len), dpi=myDpi, facecolor='w')
     ax = fig.add_axes([0, 0, 1, 1])
     plt.autoscale(False, tight=True)
     plt.xlim(0, k1)
     plt.ylim(0, k1)
 
 
-    def load_feature(feature, shape='circle', target=None):
+    def load_feature(feature, shape='circle', target=None, feature_type='gradient'):
 
         if target is None:
             target = real()
 
         for dot in feature:
-            if shape == 'circle':
-                ax.add_artist(plt.Circle((dot[0], dot[1]), dot[2], ec='none', color=target[0], alpha=target[1]))
-            elif shape == 'ellipse' or 'oval':
-
-                # Edit parameters here:
-                width_height_ratio = 3 / 4
+            if feature_type == 'gradient':
                 num_steps = dot[2] * 2
-
+                # We used equal stride for the gradient in this case.
+                # It is also possible to use a list of pre-defined alpha value directly
+                # Direct superimposing is made when making the gradient effect (e.g given a
+                # 8*6 oval centered at (0,0) and then draw another 4*3 oval centered at (0,0))
                 for steps in range(1, num_steps + 1):
                     coefficient = steps / num_steps * 2
-                    ax.add_artist(
-                        Ellipse((dot[0], dot[1]), width=dot[2] * coefficient,
-                                height=dot[2] * width_height_ratio * coefficient, angle=dot[3],
-                                edgecolor=None, facecolor=target[0], alpha=target[1] * 2 / num_steps))
+                    if shape == 'circle':
+                        ax.add_artist(
+                            plt.Circle((dot[0], dot[1]), dot[2], ec=None, color=target[0],
+                                       alpha=target[1] * 2 / num_steps))
+
+                    elif shape == 'oval' or 'ellipse':
+                        width_height_ratio = 3 / 4
+                        ax.add_artist(
+                            Ellipse((dot[0], dot[1]), width=dot[2] * coefficient,
+                                    height=dot[2] * width_height_ratio * coefficient, angle=dot[3],
+                                    edgecolor=None, facecolor=target[0], alpha=target[1] * 2 / num_steps))
+
+            elif shape == 'circle':
+                ax.add_artist(plt.Circle((dot[0], dot[1]), dot[2], ec='none', color=target[0], alpha=target[1]))
+            elif shape == 'oval' or 'ellipse':
+                width_height_ratio = 3 / 4
+                ax.add_artist(
+                    Ellipse((dot[0], dot[1]), width=dot[2],
+                            height=dot[2] * width_height_ratio, angle=dot[3],
+                            edgecolor=None, facecolor=target[0], alpha=target[1]))
+            # More custom procedures for adding new features onto the graph can be added here .
 
 
-    RawMap = feature_gen(k1, n1, max_r1)
+    # RawMap: the list for real feature
+    RawMap = feature_gen(k1, real_pram[0], real_pram[1])
+
+    # Generating ground truth and save it
     load_feature(RawMap, shape='oval')
-
-    # verifying graph is correctly extracted
     ax.axis('square', adjustabble='box-force')
     ax.plot()
-
     region = ax.transData.transform([(0, 0), (k1, k1)])
     BBOX = trs.Bbox(region / myDpi)
     fig.savefig("GT-testing1", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
                 pad_inches=0)
 
-    Obstacle1 = feature_gen(k1, 15, 15)
-    fakeTarget = feature_gen(k1, 10, max_r1)
+    # Generating all the obstacle and fake target then save it
+    Obstacle1 = feature_gen(k1, obstacle_pram[0], obstacle_pram[1])
+    fakeTarget = feature_gen(k1, fake_pram[0], fake_pram[1])
 
-    load_feature(Obstacle1, target=reduce())
-    load_feature(fakeTarget, target=enhance())
+    load_feature(Obstacle1, shape='oval', target=reduce())
+    load_feature(fakeTarget, shape='oval', target=enhance())
     ax.plot()
     plt.show()
     fig.savefig("testing1", dpi=myDpi, facecolor='w', bbox_inches=BBOX,

@@ -1,16 +1,22 @@
 import Simulator as Sim
 import numpy as np
 from joblib import Parallel, delayed
-import blurring as sp
 from scipy.ndimage import gaussian_filter
 
 
+# If the parameter for parallel processing is not correctly met,
+# we will use only 1 processor
 def check_parallel(ImgSize, numJobs, boxSize0):
     if ImgSize % (numJobs * boxSize0) == 0:
         return True
     return False
 
 
+# cv2 uses GBR instead of RGB. and for any color, we let R be the "ROI" degree of certainty
+# and GB be the degree of uncertainty. More certainty means more information of interest
+# according to the NN. The information here, however, is not normalized and will be normalized later.
+
+# The formula for calculating information is: (R-(B+G)/2)/255, and the information cannot be negative
 def calculate_info(index, GT_Img0, n_worker0, boxSize0):
     base = index * int(GT_Img0.shape[0] / n_worker0)
     end = (index + 1) * int(GT_Img0.shape[0] / n_worker0)
@@ -31,32 +37,23 @@ def calculate_info(index, GT_Img0, n_worker0, boxSize0):
 
 
 if __name__ == '__main__':
-    rows = 100
-    cols = 100
-    boxSize = 20
-    GroundTruth = Sim.ICRSsimulator('testing1_blurred.png')
+    # Run after blurring.py
+    # reduce the resolution and setting gaussian blurry level
+    rows = 200
+    cols = 200
+    boxSize = 10
+    gaussian_sigma = 1
 
+    # Reduce resolution with ICRSsimulator
+    GroundTruth = Sim.ICRSsimulator('testing1_blurred.png')
     if not GroundTruth.loadImage():
         print("Error: could not load image")
         exit(0)
-    '''
-    lower = np.array([255, 255, 255])
-    upper = np.array([255, 255, 255])
-
-    interestValue = 0  # Mark these areas as being of no interest
-    GroundTruth.classify('Background', lower, upper, interestValue)
-
-    lower = np.array([0, 0, 255])
-    upper = np.array([200, 200, 255])
-    interestValue = 0  # Mark these areas as being of no interest
-    GroundTruth.classify('target', lower, upper, interestValue)
-    '''
     GroundTruth.setMapSize(rows, cols)
-
     GroundTruth.createMap()
-    # GroundTruth.showMap()
     GT_Img = GroundTruth.img
 
+    # Parallel implementation of calculate_info
     n_worker = 4
     results = None
     if check_parallel(GT_Img.shape[0], n_worker, boxSize):
@@ -69,6 +66,10 @@ if __name__ == '__main__':
     GT_InfoMap = results[0]
     for n in range(1, n_worker):
         GT_InfoMap = np.concatenate((GT_InfoMap, results[n]), axis=0)
-    InfoMap2 = gaussian_filter(GT_InfoMap, sigma=1)
+
+    # Apply Gaussian blurry
+    InfoMap2 = gaussian_filter(GT_InfoMap, sigma=gaussian_sigma)
+
+    # Save the reduced resolution map with and without being blurred.
     np.save('InfoMap', np.asarray(GT_InfoMap), allow_pickle=False)
     np.save('InfoMap_blurred', np.asarray(InfoMap2), allow_pickle=False)
