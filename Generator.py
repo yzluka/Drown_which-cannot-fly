@@ -24,7 +24,7 @@ def real():
 
 # obstacle [color, alpha]
 def reduce():
-    return ['b', 0.3]
+    return ['b', 0.4]
 
 
 def row_info(picture, index):
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     # [number of feature, maximum size of the feature]
     real_pram = [10, 10]
-    obstacle_pram = [15, 8]
+    obstacle_pram = [15, 25]
     fake_pram = [10, 10]
 
     # 5.5 = 2000 pixel at dpi = 200. May scale up as demanded
@@ -114,11 +114,11 @@ if __name__ == '__main__':
     Obstacle1 = feature_gen(k1, obstacle_pram[0], obstacle_pram[1])
     fakeTarget = feature_gen(k1, fake_pram[0], fake_pram[1])
 
-    load_feature(Obstacle1, shape='oval', target=reduce())
+    load_feature(Obstacle1, shape='oval', target=reduce(), feature_type='flat')
     load_feature(fakeTarget, shape='oval', target=enhance())
     ax.plot()
     plt.show()
-    fig.savefig("testing1", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
+    fig.savefig("testing1_full", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
                 pad_inches=0)
 
     # Also generating the information map for ground truth: what we see when closer look is taken

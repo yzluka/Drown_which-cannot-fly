@@ -5,7 +5,7 @@ import cv2
 
 # density controls the total strength of noise
 # portion controls the proportion sand noise amount all
-def salt_noisy(image, density=0.04, portion=0.5):
+def salt_noisy(image, density=0.03, portion=0.5):
     s_vs_p = portion
     amount = density
     out = image.copy()
@@ -27,8 +27,7 @@ def salt_noisy(image, density=0.04, portion=0.5):
 
 if __name__ == '__main__':
     img0 = cv2.imread('GT-testing1.png')
-    img0_1 = cv2.imread('testing1.png')
-    img1 = salt_noisy(img0_1)
+    img1 = salt_noisy(cv2.imread('testing1_full.png'))
 
     cv2.imwrite('testing1_blurred.png', img1)
     # save a copy of the ground truth

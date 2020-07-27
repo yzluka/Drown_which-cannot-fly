@@ -21,7 +21,7 @@ def calculate_info(index, GT_Img0, n_worker0, boxSize0):
     base = index * int(GT_Img0.shape[0] / n_worker0)
     end = (index + 1) * int(GT_Img0.shape[0] / n_worker0)
 
-    chunkRow = int(GT_Img0.shape[0] / boxSize0 / n_worker)
+    chunkRow = int(GT_Img0.shape[0] / boxSize0 / n_worker0)
     chunkCol = int(GT_Img0.shape[1] / boxSize0)
     GT_InfoMap0 = np.zeros((chunkRow, chunkCol), dtype=float)
 
@@ -36,6 +36,24 @@ def calculate_info(index, GT_Img0, n_worker0, boxSize0):
     return GT_InfoMap0
 
 
+def p_processing_img(GT_Img, BoxSize):
+    # Parallel implementation of calculate_info
+    n_worker = 4
+    results = None
+    if check_parallel(GT_Img.shape[0], n_worker, BoxSize):
+        results = Parallel(n_jobs=n_worker)(
+            delayed(calculate_info)(ind, GT_Img, n_worker, BoxSize) for ind in range(n_worker))
+    else:  # not tested
+        results = Parallel(n_jobs=1)(
+            delayed(calculate_info)(ind, GT_Img, n_worker, BoxSize) for ind in range(n_worker))
+
+    GT_InfoMap = results[0]
+    for n in range(1, n_worker):
+        GT_InfoMap = np.concatenate((GT_InfoMap, results[n]), axis=0)
+
+    return GT_InfoMap
+
+
 if __name__ == '__main__':
     # Run after blurring.py
     # reduce the resolution and setting gaussian blurry level
@@ -45,31 +63,27 @@ if __name__ == '__main__':
     gaussian_sigma = 1
 
     # Reduce resolution with ICRSsimulator
-    GroundTruth = Sim.ICRSsimulator('testing1_blurred.png')
-    if not GroundTruth.loadImage():
+    Obj_real = Sim.ICRSsimulator('GT-testing1.png')
+    Obj_blurred = Sim.ICRSsimulator('testing1_blurred.png')
+
+    if not Obj_blurred.loadImage() or not Obj_real.loadImage():
         print("Error: could not load image")
         exit(0)
-    GroundTruth.setMapSize(rows, cols)
-    GroundTruth.createMap()
-    GT_Img = GroundTruth.img
 
-    # Parallel implementation of calculate_info
-    n_worker = 4
-    results = None
-    if check_parallel(GT_Img.shape[0], n_worker, boxSize):
-        results = Parallel(n_jobs=n_worker)(
-            delayed(calculate_info)(ind, GT_Img, n_worker, boxSize) for ind in range(n_worker))
-    else:  # not tested
-        results = Parallel(n_jobs=1)(
-            delayed(calculate_info)(ind, GT_Img, n_worker, boxSize) for ind in range(n_worker))
+    Obj_real.setMapSize(rows, cols)
+    Obj_real.createMap()
+    Obj_blurred.setMapSize(rows, cols)
+    Obj_blurred.createMap()
 
-    GT_InfoMap = results[0]
-    for n in range(1, n_worker):
-        GT_InfoMap = np.concatenate((GT_InfoMap, results[n]), axis=0)
+    Img_real = Obj_real.img
+    Img_blurred = Obj_blurred.img
+
+    InfoMap_real = p_processing_img(Img_real, boxSize)
+    InfoMap_blurred = p_processing_img(Img_blurred, boxSize)
 
     # Apply Gaussian blurry
-    InfoMap2 = gaussian_filter(GT_InfoMap, sigma=gaussian_sigma)
+    InfoMap2 = gaussian_filter(InfoMap_blurred, sigma=gaussian_sigma)
 
     # Save the reduced resolution map with and without being blurred.
-    np.save('InfoMap', np.asarray(GT_InfoMap), allow_pickle=False)
+    np.save('GT-InfoMap', np.asarray(InfoMap_real), allow_pickle=False)
     np.save('InfoMap_blurred', np.asarray(InfoMap2), allow_pickle=False)
