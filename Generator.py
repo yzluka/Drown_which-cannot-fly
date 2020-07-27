@@ -9,11 +9,12 @@ from matplotlib import pyplot as plt
 from matplotlib import transforms as trs
 from matplotlib.patches import Ellipse
 import matplotlib as mpl
+import cv2
 
 
 # Fake object [color, alpha]
 def enhance():
-    return ['#ff007f', 0.2]
+    return ['#ff007f', 0.5]
 
 
 # Real object [color, alpha]
@@ -23,7 +24,11 @@ def real():
 
 # obstacle [color, alpha]
 def reduce():
-    return ['b', 0.2]
+    return ['b', 0.3]
+
+
+def row_info(picture, index):
+    return picture[index, :, 2] - picture[index, :, 0] / 2 - picture[index, :, 1] / 2
 
 
 # generate the position, size and angle of rotation for each feature
@@ -41,9 +46,9 @@ if __name__ == '__main__':
     k1 = 200
 
     # [number of feature, maximum size of the feature]
-    real_pram = [10, 20]
-    obstacle_pram = [15, 15]
-    fake_pram = [10, 20]
+    real_pram = [10, 10]
+    obstacle_pram = [15, 8]
+    fake_pram = [10, 10]
 
     # 5.5 = 2000 pixel at dpi = 200. May scale up as demanded
     myDpi = 400
@@ -115,3 +120,13 @@ if __name__ == '__main__':
     plt.show()
     fig.savefig("testing1", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
                 pad_inches=0)
+
+    # Also generating the information map for ground truth: what we see when closer look is taken
+    from joblib import Parallel, delayed
+
+    rawImg = cv2.imread('GT-testing1.png')
+    GT_InfoMap = np.array(Parallel(n_jobs=4)(delayed(row_info)(rawImg, i)
+                                             for i in range(rawImg.shape[1])), dtype=np.uint8)
+
+    np.save('GT-testing1-info', GT_InfoMap)
+    cv2.imwrite('GT-testing1-info.png', GT_InfoMap)

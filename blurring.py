@@ -33,4 +33,5 @@ if __name__ == '__main__':
     cv2.imwrite('testing1_blurred.png', img1)
     # save a copy of the ground truth
     binmap = cv2.inRange(img0, np.array([255, 255, 255]), np.array([255, 255, 255]))
+    print(binmap.dtype)
     cv2.imwrite('GT-testing1_bw.png', binmap)
