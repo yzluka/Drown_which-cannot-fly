@@ -24,7 +24,7 @@ def real():
 
 # obstacle [color, alpha]
 def reduce():
-    return ['b', 0.5]
+    return ['b', 0.9]
 
 
 def row_info(picture, index):
@@ -46,9 +46,9 @@ if __name__ == '__main__':
     k1 = 200
 
     # [number of feature, maximum size of the feature]
-    real_pram = [15, 10]
-    obstacle_pram = [40, 25]
-    fake_pram = [10, 10]
+    real_pram = [15, 15]
+    obstacle_pram = [45, 30]
+    fake_pram = [7, 15]
 
     # 5.5 = 2000 pixel at dpi = 200. May scale up as demanded
     myDpi = 400
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     Obstacle1 = feature_gen(k1, obstacle_pram[0], obstacle_pram[1])
     fakeTarget = feature_gen(k1, fake_pram[0], fake_pram[1])
 
-    load_feature(Obstacle1, shape='oval', target=reduce(), feature_type='flat')
+    load_feature(Obstacle1, shape='oval', target=reduce())
     load_feature(fakeTarget, shape='oval', target=enhance())
     ax.plot()
     plt.show()
