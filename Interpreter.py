@@ -85,5 +85,5 @@ if __name__ == '__main__':
     InfoMap2 = gaussian_filter(InfoMap_blurred, sigma=gaussian_sigma)
 
     # Save the reduced resolution map with and without being blurred.
-    np.save('GT_Convoluted', np.asarray(InfoMap_real), allow_pickle=False)
-    np.save('wFakeObjects_Convoluted+s&p+Gaussian', np.asarray(InfoMap2), allow_pickle=False)
+    np.save('GT_Info_Convoluted', np.asarray(InfoMap_real), allow_pickle=False)
+    np.save('wFakeObjects_Info_Convoluted+s&p+Gaussian', np.asarray(InfoMap2), allow_pickle=False)

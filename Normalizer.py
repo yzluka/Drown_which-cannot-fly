@@ -6,12 +6,12 @@ import cv2
 box_pixel = 10 ** 2
 
 # choose the output to be normalized
-filename = 'GT_Convoluted'
+filename = 'GT_Info_Convoluted'
 myMap0 = np.load(filename + '.npy')
 cv2.imwrite(filename + '.png', np.array(myMap0, dtype=np.uint8))
 print('# of true non-empty block: ', len(np.argwhere(myMap0 > 0)))
 
-filename = 'wFakeObjects_Convoluted+s&p+Gaussian'
+filename = 'wFakeObjects_Info_Convoluted+s&p+Gaussian'
 myMap1 = np.load(filename + '.npy')
 cv2.imwrite(filename + '.png', np.array(myMap1, dtype=np.uint8))
 
