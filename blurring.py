@@ -26,10 +26,7 @@ def salt_noisy(image, density=0.03, portion=0.5):
 
 
 if __name__ == '__main__':
-    img0 = cv2.imread('GT-testing1.png')
-    img1 = salt_noisy(cv2.imread('testing1_full.png'))
+    img0 = cv2.imread('GT_Full.png')
+    img1 = salt_noisy(cv2.imread('wFakeObjects_Full.png'))
 
-    cv2.imwrite('testing1_blurred.png', img1)
-    # save a copy of the ground truth
-    binmap = cv2.inRange(img0, np.array([255, 255, 255]), np.array([255, 255, 255]))
-    cv2.imwrite('GT-testing1_bw.png', binmap)
+    cv2.imwrite('wFakeObjects_Full+s&p.png', img1)

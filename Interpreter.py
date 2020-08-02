@@ -63,8 +63,8 @@ if __name__ == '__main__':
     gaussian_sigma = 1
 
     # Reduce resolution with ICRSsimulator
-    Obj_real = Sim.ICRSsimulator('GT-testing1.png')
-    Obj_blurred = Sim.ICRSsimulator('testing1_blurred.png')
+    Obj_real = Sim.ICRSsimulator('GT_Full.png')
+    Obj_blurred = Sim.ICRSsimulator('wFakeObjects_Full+s&p.png')
 
     if not Obj_blurred.loadImage() or not Obj_real.loadImage():
         print("Error: could not load image")
@@ -85,5 +85,5 @@ if __name__ == '__main__':
     InfoMap2 = gaussian_filter(InfoMap_blurred, sigma=gaussian_sigma)
 
     # Save the reduced resolution map with and without being blurred.
-    np.save('GT-InfoMap', np.asarray(InfoMap_real), allow_pickle=False)
-    np.save('InfoMap_blurred', np.asarray(InfoMap2), allow_pickle=False)
+    np.save('GT_Convoluted', np.asarray(InfoMap_real), allow_pickle=False)
+    np.save('wFakeObjects_Convoluted+s&p+Gaussian', np.asarray(InfoMap2), allow_pickle=False)

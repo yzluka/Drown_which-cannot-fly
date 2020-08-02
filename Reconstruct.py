@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
-def from_file(filename='InfoMap_blurred.npy'):
+def from_file(filename='wFakeObjects_Full+s&p+Gaussian.npy'):
     return np.load(filename)
 
 

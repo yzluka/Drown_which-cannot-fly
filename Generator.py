@@ -24,7 +24,7 @@ def real():
 
 # obstacle [color, alpha]
 def reduce():
-    return ['b', 0.4]
+    return ['b', 0.5]
 
 
 def row_info(picture, index):
@@ -46,8 +46,8 @@ if __name__ == '__main__':
     k1 = 200
 
     # [number of feature, maximum size of the feature]
-    real_pram = [10, 10]
-    obstacle_pram = [15, 25]
+    real_pram = [15, 10]
+    obstacle_pram = [40, 25]
     fake_pram = [10, 10]
 
     # 5.5 = 2000 pixel at dpi = 200. May scale up as demanded
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     ax.plot()
     region = ax.transData.transform([(0, 0), (k1, k1)])
     BBOX = trs.Bbox(region / myDpi)
-    fig.savefig("GT-testing1", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
+    fig.savefig("GT_Full", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
                 pad_inches=0)
 
     # Generating all the obstacle and fake target then save it
@@ -118,15 +118,15 @@ if __name__ == '__main__':
     load_feature(fakeTarget, shape='oval', target=enhance())
     ax.plot()
     plt.show()
-    fig.savefig("testing1_full", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
+    fig.savefig("wFakeObjects_Full", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
                 pad_inches=0)
 
     # Also generating the information map for ground truth: what we see when closer look is taken
     from joblib import Parallel, delayed
 
-    rawImg = cv2.imread('GT-testing1.png')
+    rawImg = cv2.imread('GT_Full.png')
     GT_InfoMap = np.array(Parallel(n_jobs=4)(delayed(row_info)(rawImg, i)
                                              for i in range(rawImg.shape[1])), dtype=np.uint8)
 
-    np.save('GT-testing1-info', GT_InfoMap)
-    cv2.imwrite('GT-testing1-info.png', GT_InfoMap)
+    np.save('GT_Info_Full', GT_InfoMap)
+    cv2.imwrite('GT_Info_Full.png', GT_InfoMap)
