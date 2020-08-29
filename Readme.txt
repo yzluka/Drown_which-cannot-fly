@@ -8,9 +8,13 @@ File explanation (By execution sequence):
 
     1. Generator.py: Generating the positions, size and rotation angle of all the feature on the simulated map and then draw them out.
     
-        Output: GT-testing1.png (the ground truth image)
+        Output: GT_Full.png (the raw ground truth image)
         
-                testing1.png (the high resolution image with artificially added inaccuracy)
+                wFakeObjects_Full.png (the high resolution image with artificially added inaccuracy)
+
+                GT_Info_Full.png (information quantity in the ground truth image, with vale 0~255
+
+                GT_Info_Full.npy (GT_Info_Full.png stored in a 2D np-array)
 
         Key functions:
 
@@ -35,22 +39,22 @@ File explanation (By execution sequence):
                 
     2. blurry.py: Taking the two inputs from Generator.py and add salt and pepper noise w/ MODIFIABLE intensity and proportion to testing1.png.
     
-        Output: GT-testing1_bw.png (binary map with tells if each pixel belongs to a real target or not)
-    
-                testing1_blurred.png (Added salt and pepper noise to testing1.png)
+        Output: wFakeObjects_Full+s&p.png (Added salt and pepper noise to testing1.png)
 
         Key functions:
             salt_noisy(image, density=0.04, portion=0.5)
                 image: an image opened by cv2
                 density: the intensity of the salt and pepper noise, the larger, the more noise
-                portion: the number of salt noise vs pepper noise
+                portion: the proportion of salt noise in the overall noise
 
     
     3. Interpreter.py: Calculating the information within each region(smaller square) and outputting the RAW information map. Also adding the gaussian noise to it.
     
-        Output: InfoMap.npy (The information map, an 2D array which contains the information of each region WITHOUT the gaussian noise)
+        Output: GT_Info_Convoluted.npy (The information map, an 2D array which contains the ground-truth information of each subregion)
                 
-                InfoMap_blurred.npy (The information map, an 2D array which contains the information of each region WITH the gaussian noise)
+                wFakeObjects_Info_Convoluted+s&p+Gaussian.npy (The information map, an 2D array which
+                                                                    contains the information of each region
+                                                                    WITH the salt&pepper and gaussian noise in simulating blurry)
                 
                 Note: Both of the .npy files take the salt and pepper noise into account and both gives RAW information. Normalization can be made directly on it.
 
@@ -61,7 +65,7 @@ File explanation (By execution sequence):
                 GT_Img0: the blurred image with all feature that is to be calculated information map
                 n_worker0: # of processor to be used
                 boxSize0: the edge length in pixel for each information region
-                *** Inside this function a formula for calculating information is used. But this formula chan be changed.
+                *** Inside this function a formula for calculating information is used. But this formula can be changed.
 
                 For now, it is in line 31 and looks like this: "val = (loc[2] - (float(loc[0]) + loc[1]) / 2) / 255";
                 What it means is:(R-(B+G)/2)/255; More information is available within the file
@@ -70,4 +74,4 @@ File explanation (By execution sequence):
     4. Reconstruct.py: Visualization of the information map. Can be used to compare with the result given by GT-testing_bw.png. We can visually find that we have some ROI being
         hidden and some False positive (FP) start to appear on the product map. This fits exactly with the nature of a typical output from a Neural Network.
      
-    5. Normalizer.py: Turn the information map from raw data into NN-like output(0-1 range)
+    5. Normalizer.py: Turn the information map from raw data into NN-like output (0-1 range). In this case, sigmoid function is used.
