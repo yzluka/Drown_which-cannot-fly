@@ -36,13 +36,14 @@ def get_oval_index(center, direction_angle, half_height, half_width):
 
 
 def plot_oval(canvas_temp, center, direction_angle, half_height, half_width,
-              peak, margin, oval_id, manual=False):
+              peak, margin, oval_id, num_level, manual=False):
     # layer 0 is if
     # layer 1 is information
     if not 0 <= margin < peak <= 1:
         print("Please enter parameter margin and peak  properly")
     else:
-        gradient_stride = 5
+
+        gradient_stride = np.floor(min(half_width, half_height) / num_level)
         delta = (peak - margin) / (np.floor(min(half_width, half_height) / gradient_stride))
         index = get_oval_index(center, direction_angle, half_height, half_width)
 
@@ -50,8 +51,9 @@ def plot_oval(canvas_temp, center, direction_angle, half_height, half_width,
             canvas_temp[index[:, 0], index[:, 1], 0] = oval_id
 
         while min(half_width, half_height) > gradient_stride:
+            ratio = half_height / half_width
             half_width -= gradient_stride
-            half_height -= gradient_stride
+            half_height -= int(ratio * gradient_stride)
             index = get_oval_index(center, direction_angle, half_height, half_width)
             canvas_temp[index[:, 0], index[:, 1], 1] += delta
         else:
@@ -64,7 +66,8 @@ def plot_oval(canvas_temp, center, direction_angle, half_height, half_width,
 if __name__ == "__main__":
     # layer 0  is coloring, layer 1 is ID, and layer 2 is information
     canvas = np.zeros((edge_len, edge_len, 2), dtype='float32')
-    canvas = plot_oval(canvas, [700, 800], np.pi / 4, 100, 60, 1, 0.4, 1)
-    canvas = plot_oval(canvas, [1400, 350], np.pi / 8, 120, 100, 1, 0.6, 2)
+    canvas = plot_oval(canvas, [700, 800], np.pi / 4, 100, 60, 1, 0.4, 1, 8)
+    canvas = plot_oval(canvas, [1400, 350], np.pi / 8, 120, 100, 1, 0.6, 2, 10)
     plt.imshow(canvas[:, :, 1] * 255, cmap='gray')
+    plt.imshow(canvas[:, :, 0])
     plt.show()
