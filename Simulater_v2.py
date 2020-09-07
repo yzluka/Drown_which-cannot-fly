@@ -1,57 +1,70 @@
 import numpy as np
-from joblib import Parallel, delayed
 import matplotlib.pyplot as plt
 
 edge_len = 2000
 
 
-def rotation(index, direction_angle0):
-    index = np.array(index)
+def get_oval_index(center, direction_angle, half_height, half_width):
+    center = np.array(center)
+    index = []
+    buffer = max(half_width, half_height)
+    w_start, w_end = center[0] - buffer, center[0] + buffer + 1
+    h_start, h_end = center[1] - buffer, center[1] + buffer + 1
+    half_width, half_height = int(half_width), int(half_height)
+
+    for i in range(w_start, w_end):
+        for j in range(h_start, h_end):
+            # Oval formula with rotation angle integration
+            distance = ((i - center[0]) * np.cos(direction_angle) + (j - center[1]) * np.sin(
+                direction_angle)) ** 2 / half_width ** 2 + (
+                               (i - center[0]) * np.sin(direction_angle) -
+                               (j - center[1]) * np.cos(direction_angle)) ** 2 / half_height ** 2
+
+            if distance <= 1:
+                index.append(np.array([i, j]))
+
     index2 = []
-    for i in index:
-        sin = np.sin(direction_angle0)
-        cos = np.cos(direction_angle0)
-        index2.append(np.dot(np.array([[cos, -sin],
-                                       [sin, cos]]), i))
+
+    for each in index:
+
+        if 0 <= each[0] < edge_len and 0 <= each[1] < edge_len:
+            index2.append(each)
+
     index2 = np.array(index2, dtype='int16')
+
     return index2
 
 
-def add_oval(canvas_temp, center, direction_angle, half_height, half_width, center_info, edge_info, id):
-    center = np.array(center)
-    # First, check if in the oval
-    index = []
-    index2 = []
-    half_width, half_height = int(half_width), int(half_height)
-    for i in range(-half_width, half_width + 1):
-        for j in range(-half_height, half_height + 1):
-            if i ** 2 / half_width ** 2 + j ** 2 / half_height ** 2 <= 1:
-                index.append(np.array([i, j]))
+def plot_oval(canvas_temp, center, direction_angle, half_height, half_width,
+              peak, margin, oval_id, manual=False):
+    # layer 0 is if
+    # layer 1 is information
+    if not 0 <= margin < peak <= 1:
+        print("Please enter parameter margin and peak  properly")
+    else:
+        gradient_stride = 5
+        delta = (peak - margin) / (np.floor(min(half_width, half_height) / gradient_stride))
+        index = get_oval_index(center, direction_angle, half_height, half_width)
 
-    index = rotation(np.array(index), direction_angle)
-    for each in index:
-        temp = each + center
-        if 0 <= temp[0] < edge_len and 0 <= temp[1] < edge_len:
-            index2.append(each)
-    index2 = np.array(index2)
-    print(index2)
-    plt.plot(index2[:, 0], index2[:, 1], ls='', marker='o')
-    plt.axis('equal')
-    plt.show()
+        if len(index[canvas_temp[index[:, 0], index[:, 1], 0] != 0]) == 0:
+            canvas_temp[index[:, 0], index[:, 1], 0] = oval_id
 
-    print("index shape is: ", index.shape)
+        while min(half_width, half_height) > gradient_stride:
+            half_width -= gradient_stride
+            half_height -= gradient_stride
+            index = get_oval_index(center, direction_angle, half_height, half_width)
+            canvas_temp[index[:, 0], index[:, 1], 1] += delta
+        else:
+            if manual:
+                print("Overlapping occurred")
 
-    '''
-    # Second, transformation
-
-    # Third, check overlapping
-    for i in range(edge_len):
-        temp[i] = np.sqrt((row_num - center[0]) ** 2 + (i - center[1]) ** 2)
-    new_indexes = np.argwhere()
-    '''
+    return canvas_temp
 
 
 if __name__ == "__main__":
     # layer 0  is coloring, layer 1 is ID, and layer 2 is information
-    canvas = np.zeros((edge_len, edge_len, 3), dtype='float32')
-    add_oval(canvas, [100, 100], np.pi / 4, 15, 7, 0.9, 0.6, 1)
+    canvas = np.zeros((edge_len, edge_len, 2), dtype='float32')
+    canvas = plot_oval(canvas, [700, 800], np.pi / 4, 100, 60, 1, 0.4, 1)
+    canvas = plot_oval(canvas, [1400, 350], np.pi / 8, 120, 100, 1, 0.6, 2)
+    plt.imshow(canvas[:, :, 1] * 255, cmap='gray')
+    plt.show()
