@@ -4,6 +4,7 @@ from joblib import Parallel, delayed
 
 # setting the image size here
 edge_len = 2000
+n_processor = 4
 
 
 def goi_kernel(i, h_start, h_end, center, half_width, half_height, direction_angle):
@@ -23,7 +24,7 @@ def goi_kernel(i, h_start, h_end, center, half_width, half_height, direction_ang
 
 
 def get_oval_index(center, direction_angle, half_height, half_width):
-    center = np.array(center)
+    center = np.array(center, dtype='int16')
     index = []
     buffer = max(half_width, half_height)
     w_start, w_end = center[0] - buffer, center[0] + buffer + 1
@@ -38,7 +39,7 @@ def get_oval_index(center, direction_angle, half_height, half_width):
                            (i - center[0]) * np.sin(direction_angle) -
                            (j - center[1]) * np.cos(direction_angle)) ** 2 / half_height ** 2
     '''
-    distance_j = Parallel(n_jobs=4)(
+    distance_j = Parallel(n_jobs=n_processor)(
         delayed(goi_kernel)(i, h_start, h_end, center, half_width, half_height, direction_angle)
         for i in range(w_start, w_end))
 
