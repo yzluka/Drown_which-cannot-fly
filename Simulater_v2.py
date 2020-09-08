@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
 
+# setting the image size here
 edge_len = 2000
 
 
