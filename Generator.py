@@ -92,7 +92,7 @@ if __name__ == '__main__':
             elif shape == 'circle':
                 ax.add_artist(plt.Circle((dot[0], dot[1]), dot[2], ec='none', color=target[0], alpha=target[1]))
             elif shape == 'oval' or 'ellipse':
-                width_height_ratio = 3 / 4
+                width_height_ratio = np.max(0.1, np.random.rand(1)[0])
                 ax.add_artist(
                     Ellipse((dot[0], dot[1]), width=dot[2],
                             height=dot[2] * width_height_ratio, angle=dot[3],
@@ -137,7 +137,6 @@ if __name__ == '__main__':
     rawImg = cv2.imread('GT_Full.png')
     GT_InfoMap = np.array(Parallel(n_jobs=8)(delayed(row_info)(rawImg, i)
                                              for i in range(rawImg.shape[1])), dtype='float16')
-
     max_val = np.max(GT_InfoMap)
     rawImg = GT_InfoMap / max_val
     np.save('GT_Info_Full', GT_InfoMap / max_val)
@@ -148,11 +147,11 @@ if __name__ == '__main__':
 
     # blurring image
     rawImg = blur.salt_noisy(rawImg)
-    gaussian_filter(rawImg, sigma=1)
+
+    rawImg = gaussian_filter(rawImg, sigma=np.random.rand(1)[0] * 1.8 + 0.2)
 
     Belief_InfoMap = np.array(Parallel(n_jobs=8)(delayed(row_info)(rawImg, i)
                                                  for i in range(rawImg.shape[1])), dtype='float16')
-
     max_val = np.max(Belief_InfoMap)
     rawImg = Belief_InfoMap / max_val
     np.save('Belief_Info_Full', rawImg)
