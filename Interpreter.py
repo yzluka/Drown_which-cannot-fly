@@ -38,7 +38,7 @@ def calculate_info(index, GT_Img0, n_worker0, boxSize0):
 
 def p_processing_img(GT_Img, BoxSize):
     # Parallel implementation of calculate_info
-    n_worker = 4
+    n_worker = 8
     results = None
     if check_parallel(GT_Img.shape[0], n_worker, BoxSize):
         results = Parallel(n_jobs=n_worker)(

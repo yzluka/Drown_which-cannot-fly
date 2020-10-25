@@ -14,7 +14,7 @@ def salt_noisy(image, density=0.03, portion=0.5):
     num_salt = np.ceil(amount * image.size * s_vs_p)
     coords = [np.random.randint(0, i, int(num_salt))
               for i in image.shape]
-    out[tuple(coords)] = 255
+    out[tuple(coords)] = np.max(image) * 0.8
 
     # Pepper mode
     num_pepper = np.ceil(amount * image.size * (1. - s_vs_p))

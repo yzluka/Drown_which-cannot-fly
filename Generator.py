@@ -10,6 +10,8 @@ from matplotlib import transforms as trs
 from matplotlib.patches import Ellipse
 import matplotlib as mpl
 import cv2
+import blurring as blur
+from scipy.ndimage import gaussian_filter
 
 
 # Fake object [color, alpha]
@@ -28,7 +30,7 @@ def reduce():
 
 
 def row_info(picture, index):
-    return picture[index, :, 2] - picture[index, :, 0] / 2 - picture[index, :, 1] / 2
+    return np.maximum(0, picture[index, :, 2] - picture[index, :, 0] / 2 - picture[index, :, 1] / 2)
 
 
 # generate the position, size and angle of rotation for each feature
@@ -118,15 +120,41 @@ if __name__ == '__main__':
     load_feature(fakeTarget, shape='oval', target=enhance())
     ax.plot()
     plt.show()
-    fig.savefig("wFakeObjects_Full", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
+    fig.savefig("Prior_Full", dpi=myDpi, facecolor='w', bbox_inches=BBOX,
                 pad_inches=0)
 
     # Also generating the information map for ground truth: what we see when closer look is taken
     from joblib import Parallel, delayed
 
+    '''
     rawImg = cv2.imread('GT_Full.png')
     GT_InfoMap = np.array(Parallel(n_jobs=4)(delayed(row_info)(rawImg, i)
                                              for i in range(rawImg.shape[1])), dtype=np.uint8)
 
     np.save('GT_Info_Full', GT_InfoMap)
-    cv2.imwrite('GT_Info_Full.png', GT_InfoMap)
+    cv2.imwrite('GT_Info_Full.png', GT_InfoMap)'''
+
+    rawImg = cv2.imread('GT_Full.png')
+    GT_InfoMap = np.array(Parallel(n_jobs=8)(delayed(row_info)(rawImg, i)
+                                             for i in range(rawImg.shape[1])), dtype='float16')
+
+    max_val = np.max(GT_InfoMap)
+    rawImg = GT_InfoMap / max_val
+    np.save('GT_Info_Full', GT_InfoMap / max_val)
+    img_out = np.array(rawImg * 255, dtype='uint8')
+    cv2.imwrite('GT_Info_Full.png', img_out)
+
+    rawImg = cv2.imread('Prior_Full.png')
+
+    # blurring image
+    rawImg = blur.salt_noisy(rawImg)
+    gaussian_filter(rawImg, sigma=1)
+
+    Belief_InfoMap = np.array(Parallel(n_jobs=8)(delayed(row_info)(rawImg, i)
+                                                 for i in range(rawImg.shape[1])), dtype='float16')
+
+    max_val = np.max(Belief_InfoMap)
+    rawImg = Belief_InfoMap / max_val
+    np.save('Belief_Info_Full', rawImg)
+    img_out = np.array(rawImg * 255, dtype='uint8')
+    cv2.imwrite('Belief_Info_Full.png', img_out)
